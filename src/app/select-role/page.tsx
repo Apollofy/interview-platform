@@ -43,8 +43,6 @@ export default function SelectRolePage() {
       router.push("/");
     }
   }, [userData?.role, isLoaded, router, user?.id]);
-
-  // Prevent scrolling
   useEffect(() => {
     // Add overflow-hidden to body
     document.body.style.overflow = 'hidden';
@@ -89,8 +87,6 @@ export default function SelectRolePage() {
       setIsSubmitting(false);
     }
   };
-
-  // Show loading state while checking auth or user data
   if (!isLoaded || isSubmitting) {
     return (
       <LoaderUI />
