@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 
 export const useUserRole = () => {
   const { user } = useUser();
@@ -10,9 +10,11 @@ export const useUserRole = () => {
   });
 
   const isLoading = userData === undefined;
+  const hasRole = userData?.role !== undefined;
 
   return {
     isLoading,
+    hasRole,
     isInterviewer: userData?.role === "interviewer",
     isCandidate: userData?.role === "candidate",
   };

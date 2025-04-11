@@ -7,7 +7,10 @@ const useMeetingActions = () => {
   const client = useStreamVideoClient();
 
   const createInstantMeeting = async () => {
-    if (!client) return;
+    if (!client) {
+      toast.error("Video service not initialized. Please wait a moment...");
+      return;
+    }
 
     try {
       const id = crypto.randomUUID();
@@ -22,17 +25,33 @@ const useMeetingActions = () => {
         },
       });
 
-      router.push(`/meeting/${call.id}`);
       toast.success("Meeting Created");
+      router.push(`/meeting/${call.id}`);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to create meeting");
     }
   };
 
-  const joinMeeting = (callId: string) => {
-    if (!client) return toast.error("Failed to join meeting. Please try again.");
-    router.push(`/meeting/${callId}`);
+  const joinMeeting = async (callId: string) => {
+    if (!client) {
+      toast.error("Video service not initialized. Please wait a moment...");
+      return;
+    }
+    
+    try {
+      const { calls } = await client.queryCalls({ 
+        filter_conditions: { id: callId } 
+      });
+      
+      if (calls.length === 0) {
+        toast.error("Meeting not found. Please check the meeting ID.");
+        return;
+      }
+      
+      router.push(`/meeting/${callId}`);
+    } catch (error) {
+      toast.error("Failed to join meeting");
+    }
   };
 
   return { createInstantMeeting, joinMeeting };

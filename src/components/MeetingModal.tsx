@@ -13,19 +13,27 @@ interface MeetingModalProps {
 
 function MeetingModal({ isOpen, onClose, title, isJoinMeeting }: MeetingModalProps) {
   const [meetingUrl, setMeetingUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { createInstantMeeting, joinMeeting } = useMeetingActions();
 
-  const handleStart = () => {
-    if (isJoinMeeting) {
-      // if it's a full URL extract meeting ID
-      const meetingId = meetingUrl.split("/").pop();
-      if (meetingId) joinMeeting(meetingId);
-    } else {
-      createInstantMeeting();
-    }
+  const handleStart = async () => {
+    try {
+      setIsLoading(true);
+      
+      if (isJoinMeeting) {
+        const meetingId = meetingUrl.split("/").pop();
+        if (meetingId) {
+          await joinMeeting(meetingId);
+        }
+      } else {
+        await createInstantMeeting();
+      }
 
-    setMeetingUrl("");
-    onClose();
+      setMeetingUrl("");
+      onClose();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -45,11 +53,18 @@ function MeetingModal({ isOpen, onClose, title, isJoinMeeting }: MeetingModalPro
           )}
 
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button onClick={handleStart} disabled={isJoinMeeting && !meetingUrl.trim()}>
-              {isJoinMeeting ? "Join Meeting" : "Start Meeting"}
+            <Button 
+              onClick={handleStart} 
+              disabled={(isJoinMeeting && !meetingUrl.trim()) || isLoading}
+            >
+              {isLoading 
+                ? "Loading..." 
+                : isJoinMeeting 
+                  ? "Join Meeting" 
+                  : "Start Meeting"}
             </Button>
           </div>
         </div>
